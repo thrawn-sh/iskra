@@ -75,6 +75,14 @@ python-versions = ">=3.7"
 tokenize-rt = "<5"
 
 [[package]]
+name = "smllib"
+version = "1.2"
+description = "A library for the SML (Smart Message Language) protocol"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "tokenize-rt"
 version = "4.2.1"
 description = "A wrapper around the stdlib `tokenize` which roundtrips."
@@ -101,7 +109,7 @@ python-versions = ">=2"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "e9b2a3493c8545d2f5eb6e6ff02cdc7f0a43bf3709e1e5995930318bf11f59ea"
+content-hash = "8d7e2a8f109770615d5a6c66f6ad8cc2fb26858e6cd8e82b6f74bf05ee7e6747"
 
 [metadata.files]
 argparse = [
@@ -131,6 +139,10 @@ pyflakes = [
 pyupgrade = [
     {file = "pyupgrade-2.38.4-py2.py3-none-any.whl", hash = "sha256:944ff993c396ddc2b9012eb3de4cda138eb4c149b22c6c560d4c8bfd0e180982"},
     {file = "pyupgrade-2.38.4.tar.gz", hash = "sha256:1eb43a49f416752929741ba4d706bf3f33593d3cac9bdc217fc1ef55c047c1f4"},
+]
+smllib = [
+    {file = "smllib-1.2-py3-none-any.whl", hash = "sha256:2079d501a426c97f2bdfea07247d861af9ba6b231f9e9b2c3448713239952533"},
+    {file = "smllib-1.2.tar.gz", hash = "sha256:f7a202f45e7f9d8cc8fab250c084fce047715dbbaefe60498fc9d2b125e5a22f"},
 ]
 tokenize-rt = [
     {file = "tokenize_rt-4.2.1-py2.py3-none-any.whl", hash = "sha256:08a27fa032a81cf45e8858d0ac706004fcd523e8463415ddf1442be38e204ea8"},
