@@ -19,7 +19,7 @@ def get_database_connection(config, database: str):
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description='export data from SIKRA to PostgreSQL', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(description='export data from ISKRA to PostgreSQL', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--device', default='/dev/tty0', type=str, help='Serial to read from')
     parser.add_argument('--database', default='postgresql', help='database config to use')
     parser.add_argument('--db-settings', default='database.ini', type=str, help='file containing postgresql connection configuration')
