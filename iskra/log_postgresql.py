@@ -5,7 +5,10 @@ import argparse
 import configparser
 import psycopg
 import serial
-import sml
+import smllib
+
+BUFFER_SIZE = 320
+SQL = 'INSERT INTO iskra (id, current_consumption, total_consumption, total_supply) VALUES (%(id), %(current_consumption), %(total_consumption), %(total_supply)) ON CONFLICT (time, id) DO NOTHING;'
 
 
 def get_database_connection(config, database: str):
@@ -26,26 +29,45 @@ def main() -> None:
 
     arguments = parser.parse_args()
 
+    values = {}
+    with serial.Serial(arguments.device, timeout=2) as device:
+        reader = smllib.SmlStreamReader()
+        count = 0
+        while device.readable() and count <= 0:
+            data = device.read(BUFFER_SIZE)
+            reader.add(data)
+            frame = reader.get_frame()
+            if frame is None:
+                # need to gather more bytes
+                continue
+
+            for message in frame.parse_frame():
+                count = count + 1
+                for entry in getattr(message.message_body, 'val_list', []):
+                    code = entry.obis.obis_code
+                    value = entry.get_value()
+                    if code == '1-0:96.1.0*255':
+                        values['id'] = value
+                        continue
+                    if code == '1-0:1.8.0*255':
+                        values['total_consumption'] = value
+                        continue
+                    if code == '1-0:16.7.0*255':
+                        values['current_consumption'] = value
+                        continue
+                    if code == '1-0:2.8.0*255':
+                        values['total_supply'] = value
+                        continue
+
+    print(values)
+
     db_config = configparser.ConfigParser()
     db_config.read(arguments.db_settings)
     with get_database_connection(db_config, arguments.database) as database:
-        with serial.Serial(arguments.device) as device:
-            reader = sml.SmlStreamReader()
-            while True and device.readable():
-                data = device.read(512)
-                reader.add(data)
-                frame = reader.get_frame()
-                if frame is None:
-                    # geather more bytes
-                    continue
-
-                cursor = database.cursor()
-                for message in frame.parse_frame():
-                    # prints a nice overview over the received values
-                    print(message.format_msg())
-                    # cursor.executemany(sql, inserts)
-                cursor.close()
-                database.commit()
+        cursor = database.cursor()
+        cursor.execute(SQL, values)
+        cursor.close()
+        database.commit()
 
 
 if __name__ == '__main__':
