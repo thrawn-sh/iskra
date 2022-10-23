@@ -63,7 +63,7 @@ def main() -> None:
     db_config.read(arguments.db_settings)
     with get_database_connection(db_config, arguments.database) as database:
         cursor = database.cursor()
-        cursor.execute(SQL, [values['id'], values['current_consumption'], values['total_consumption'], values['total_supply'])
+        cursor.execute(SQL, [values['id'], values['current_consumption'], values['total_consumption'], values['total_supply']])
         cursor.close()
         database.commit()
 
