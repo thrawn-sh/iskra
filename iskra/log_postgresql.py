@@ -8,7 +8,7 @@ import serial
 import smllib
 
 BUFFER_SIZE = 320
-SQL = 'INSERT INTO iskra (id, current_consumption, total_consumption, total_supply) VALUES (%(id), %(current_consumption), %(total_consumption), %(total_supply)) ON CONFLICT (time, id) DO NOTHING;'
+SQL = 'INSERT INTO iskra (id, current_consumption, total_consumption, total_supply) VALUES (%s, %s, %s, %s) ON CONFLICT (time, id) DO NOTHING;'
 
 
 def get_database_connection(config, database: str):
@@ -59,13 +59,11 @@ def main() -> None:
                         values['total_supply'] = value
                         continue
 
-    print(values)
-
     db_config = configparser.ConfigParser()
     db_config.read(arguments.db_settings)
     with get_database_connection(db_config, arguments.database) as database:
         cursor = database.cursor()
-        cursor.execute(SQL, values)
+        cursor.execute(SQL, [values['id'], values['current_consumption'], values['total_consumption'], values['total_supply'])
         cursor.close()
         database.commit()
 
