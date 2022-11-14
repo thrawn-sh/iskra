@@ -3,6 +3,7 @@
 
 import argparse
 import configparser
+import pathlib
 import psycopg
 import serial
 import smllib
@@ -26,6 +27,7 @@ def main() -> None:
     parser.add_argument('--device', default='/dev/tty0', type=str, help='Serial to read from')
     parser.add_argument('--database', default='postgresql', help='database config to use')
     parser.add_argument('--db-settings', default='database.ini', type=str, help='file containing postgresql connection configuration')
+    parser.add_argument('--sql-file', default='iskra-cache.sql', type=str, help='folder for caching sql requests')
 
     arguments = parser.parse_args()
 
@@ -58,6 +60,12 @@ def main() -> None:
                     if code == '1-0:2.8.0*255':
                         values['total_supply'] = value
                         continue
+
+    cache_file = pathlib.Path(arguments.sql_file)
+    cache_file.parent.mkdir(parents=True, exist_ok=True)
+    with open(cache_file, 'a', encoding='utf-8') as file:
+        statement = SQL % ('"' + values['id'] + '"', '"' + values['current_consumption'] + '"', '"' + values['total_consumption'] + '"', '"' + values['total_supply'] + '"')
+        file.write(statement)
 
     db_config = configparser.ConfigParser()
     db_config.read(arguments.db_settings)
