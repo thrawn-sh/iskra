@@ -3,13 +3,15 @@
 
 import argparse
 import configparser
+import datetime
 import pathlib
 import psycopg
 import serial
 import smllib
+import tzlocal
 
 BUFFER_SIZE = 320
-SQL = 'INSERT INTO iskra (id, current_consumption, total_consumption, total_supply) VALUES (%s, %s, %s, %s) ON CONFLICT (time, id) DO NOTHING;'
+SQL = 'INSERT INTO iskra (time, id, current_consumption, total_consumption, total_supply) VALUES (%s, %s, %s, %s, %s) ON CONFLICT (time, id) DO NOTHING;'
 
 
 def get_database_connection(config, database: str):
@@ -31,6 +33,8 @@ def main() -> None:
 
     arguments = parser.parse_args()
 
+    now = datetime.datetime.now()
+    now = now.astimezone(tzlocal.get_localzone()).isoformat()
     values = {}
     with serial.Serial(arguments.device, timeout=2) as device:
         reader = smllib.SmlStreamReader()
@@ -64,14 +68,16 @@ def main() -> None:
     cache_file = pathlib.Path(arguments.sql_file)
     cache_file.parent.mkdir(parents=True, exist_ok=True)
     with open(cache_file, 'a', encoding='utf-8') as file:
-        statement = SQL % ('"' + values['id'] + '"', '"' + values['current_consumption'] + '"', '"' + values['total_consumption'] + '"', '"' + values['total_supply'] + '"')
+        statement = SQL.replace('%s', '"%s"')
+        statement = statement % (now, values['id'], values['current_consumption'], values['total_consumption'], values['total_supply'])
         file.write(statement)
+        file.write('\n')
 
     db_config = configparser.ConfigParser()
     db_config.read(arguments.db_settings)
     with get_database_connection(db_config, arguments.database) as database:
         cursor = database.cursor()
-        cursor.execute(SQL, [values['id'], values['current_consumption'], values['total_consumption'], values['total_supply']])
+        cursor.execute(SQL, [now, values['id'], values['current_consumption'], values['total_consumption'], values['total_supply']])
         cursor.close()
         database.commit()
 
