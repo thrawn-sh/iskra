@@ -34,6 +34,7 @@ def main() -> None:
     arguments = parser.parse_args()
 
     now = datetime.datetime.now()
+    now = now.replace(second=0, microsecond=0)
     now = now.astimezone(tzlocal.get_localzone()).isoformat()
     values = {}
     with serial.Serial(arguments.device, timeout=2) as device:
