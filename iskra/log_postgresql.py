@@ -69,7 +69,7 @@ def main() -> None:
     cache_file = pathlib.Path(arguments.sql_file)
     cache_file.parent.mkdir(parents=True, exist_ok=True)
     with open(cache_file, 'a', encoding='utf-8') as file:
-        statement = SQL.replace('%s', '"%s"')
+        statement = SQL.replace('%s', "'%s'")
         statement = statement % (now, values['id'], values['current_consumption'], values['total_consumption'], values['total_supply'])
         file.write(statement)
         file.write('\n')
